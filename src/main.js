@@ -1,8 +1,7 @@
 import * as BABYLON from 'babylonjs'
-window.BABYLON = BABYLON
 
-const DV = window.DV
-const { Computer, Keyboard, Controls, ComputerConnection } = DV
+const { Computer, Keyboard, Controls, ComputerConnection } = window.DesktopVision.loadSDK(BABYLON)
+
 let code, token, computers = [], computerId;
 let computerConnection, desktop, keyboard, controls;
 
