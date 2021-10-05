@@ -1,11 +1,12 @@
 const express = require('express');
+require('dotenv').config()
 
-const port = process.env.PORT || 5050;
+const port = process.env.PORT || 3000;
 const app = express()
 const fetch = require('node-fetch')
-const apiConfig = require('./.apiConfig.json')
-const appID = apiConfig['X-APP-ID']
-const apiKey = apiConfig['X-API-KEY']
+
+const appID = process.env.DESKTOP_VISION_ID
+const apiKey = process.env.DESKTOP_VISION_KEY
 
 app.use(express.static(__dirname + '/public'));
 
