@@ -2,28 +2,27 @@
 
 ## Required Config files
 
-1. .apiConfig.json for connecting to the Desktop Vision oauth api
+1. A .env file is needed for connecting to the Desktop Vision oauth api
 
-```json 
-// .apiConfig.json
-{
-  "X-APP-ID": "******************************",
-  "X-API-KEY": "*****************************"
-}
+```
+DESKTOP_VISION_ID=********************
+DESKTOP_VISION_KEY=********************
+  
 ```
 
 ## Quick Start
 
 1. npm install
 2. npm run dev
-3. open http://localhost:5050
+3. open http://localhost:3000
 
 ## Test from VR
 
 1. connect vr device with cable
 2. chrome://inspect
-3. add localhost:5050 to port forwarding
-4. open http://localhost:5050 on vr device browser
+3. add localhost:3000 to port forwarding
+4. open http://localhost:3000 on vr device browser
+
 
 ## Overview
 
