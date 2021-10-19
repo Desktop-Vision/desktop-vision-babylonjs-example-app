@@ -18,11 +18,11 @@ const canvas = document.getElementById("renderCanvas");
 const clientID = "6wlqRxEgp60JXkcGkLY2"; //must match the api key used on the server
 
 const desktopPosition = { x: 0, y: 0.25, z: 2 }
-const kbPosition = { x: 0, y: -0.75, z: 0 }
+const kbPosition = { x: 0, y: 0, z: 0 }
 
 const keyboardOptions = {
 	initialPosition: kbPosition,
-	initialScalar: 0.5,
+	initialScalar: 0.35,
 	hideMoveIcon: false,
 	hideResizeIcon: false,
 }
@@ -172,12 +172,14 @@ function createComputerConnection(connectionOptions) {
 	computerConnection = new ComputerConnection(connectionOptions);
 	computerConnection.on("stream-added", (newStream) => {
 		const video = document.getElementById("video-stream");
+		video.setAttribute('webkit-playsinline', 'webkit-playsinline');
+		video.setAttribute('playsinline', 'playsinline');
 		video.srcObject = newStream;
 		video.muted = true
 		video.play();
 
 		removeComputer()
-		createComputer(video);
+		createComputer(video)
 	});
 }
 
@@ -199,6 +201,8 @@ function removeComputer() {
 
 function createTestComputer() {
 	const video = document.getElementById("video-stream");
+	video.setAttribute('webkit-playsinline', 'webkit-playsinline');
+	video.setAttribute('playsinline', 'playsinline');
 	video.src = '/dvVid.mp4';
 	video.muted = true
 	video.play();
