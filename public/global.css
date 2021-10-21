@@ -109,3 +109,18 @@
 	.scene-buttons {
 		margin-bottom: 20px;
 	}
+
+    .custom-checkbox {
+        font-size: 25px;
+        margin: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+      
+    .custom-checkbox input  {
+        width: 30px;
+        height: 30px;
+    }

@@ -1,65 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Desktop Vision Example</title>
-    <link rel="icon" type="image/png" href="/icon.png" />
-    <link rel="stylesheet" href="/global.css" />
-    <!-- <script src="/desktop-vision-js-sdk/babylon.min.js"></script> -->
-    <script src="https://js.desktop.vision/babylon.min.js"></script>
-    <script defer src="/build/bundle.js"></script>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Desktop Vision Example</title>
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="stylesheet" href="/global.css" />
+  <!-- <script src="/desktop-vision-js-sdk/babylon.min.js"></script> -->
+  <script src="https://js.desktop.vision/babylon.min.js"></script>
+  <script defer src="/build/bundle.js"></script>
+</head>
 
-  <body>
-    <div class="flex-row full-width">
-      <span class="title">Desktop Vision Example App</span>
-      <img src="icon.png" alt="dv" />
-    </div>
+<body>
+  <div class="flex-row full-width">
+    <span class="title">Desktop Vision Example App</span>
+    <img src="icon.png" alt="dv" />
+  </div>
 
-    <!-- How to -->
-    <h2>Overview:</h2>
-    <div class="text">Step 1: Get oauth code through Destop Vision oauth</div>
-    <div class="text">
-      Step 2: Get access token from server using oauth code
-    </div>
-    <div class="text">
-      Step 3: Get computers that belong to connected DV account
-    </div>
-    <div class="text">Step 4: Select computer to connect & stream from</div>
+  <!-- How to -->
+  <h2>Overview:</h2>
+  <div class="text">Step 1: Get oauth code through Destop Vision oauth</div>
+  <div class="text">
+    Step 2: Get access token from server using oauth code
+  </div>
+  <div class="text">
+    Step 3: Get computers that belong to connected DV account
+  </div>
+  <div class="text">Step 4: Select computer to connect & stream from</div>
 
-    <!-- Desktop Vision Oauth -->
-    <h2>Desktop Vision Oauth:</h2>
-    <div class="flex-row">
-      <button id="dv-auth-code">
-        Sign in to Desktop Vision (get oauth code)
-      </button>
-      <button id="dv-auth-token">
-        Connect to Desktop Vision (get auth token)
-      </button>
-      <button id="dv-fetch-computers">List Computers (get computers)</button>
-      <button id="dv-connect-computer">Connect to redirected computer</button>
-    </div>
+  <!-- Desktop Vision Oauth -->
+  <h2>Desktop Vision Oauth:</h2>
+  <div class="flex-row">
+    <button id="dv-auth-code">
+      Sign in to Desktop Vision (get oauth code)
+    </button>
+    <button id="dv-auth-token">
+      Connect to Desktop Vision (get auth token)
+    </button>
+    <button id="dv-fetch-computers">List Computers (get computers)</button>
+    <button id="dv-connect-computer">Connect to redirected computer</button>
+  </div>
 
-    <!-- Video -->
-    <h2>Current Stream:</h2>
-    <video autoplay muted id="video-stream" alt="demo" muted="true">
-      <track kind="captions" />
-    </video>
-    <div class="text">
-      This stream will be added to the scene as a Desktop Vision Computer
-    </div>
-    <div id="computers-wrapper" class="flex-row"></div>
+  <!-- Video -->
+  <h2>Current Stream:</h2>
+  <video autoplay muted id="video-stream" alt="demo" muted="true">
+    <track kind="captions" />
+  </video>
+  <div class="text">
+    This stream will be added to the scene as a Desktop Vision Computer
+  </div>
+  <div id="computers-wrapper" class="flex-row"></div>
 
-    <!-- THREE Scene -->
-    <h2>Scene:</h2>
-    <div class="flex-row scene-buttons">
-      <button id="enter-scene-button">Enter VR Scene</button>
-      <button id="computer-test-button">Create Test Computer</button>
-      <button id="computer-remove-button">Remove Computer</button>
-    </div>
-    <div id="scene-container" class="scene-wrapper">
-      <canvas id="renderCanvas"></canvas>
-    </div>
-  </body>
+  <!-- THREE Scene -->
+  <h2>Scene:</h2>
+  <label class="custom-checkbox" for="accept">
+    Attach to existing mesh: <input type="checkbox" id="custom-checkbox" name="custom-checkbox" > 
+  </label>
+  <div class="flex-row scene-buttons">
+    <button id="enter-scene-button">Enter VR Scene</button>
+    <button id="computer-test-button">Create Test Computer</button>
+    <button id="computer-remove-button">Remove Computer</button>
+  </div>
+  <div id="scene-container" class="scene-wrapper">
+    <canvas id="renderCanvas"></canvas>
+  </div>
+</body>
 </html>
