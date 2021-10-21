@@ -1,145 +1,84 @@
 import * as BABYLON from 'babylonjs'
+import { createDefaultEngine, createScene, createCamera, createTestPlane } from './setup/setupScene'
+import { updateButtonState, authCodeButton, authTokenButton, checkBox, fetchComputersButton, connectSingleComputerButton, enterSceneButton, createComputerButton, removeComputerButton, computersContainer } from './setup/setupDocument'
 
 const { Computer, Keyboard, Controls, ComputerConnection } =
   window.DesktopVision.loadSDK(BABYLON)
+
+const clientID = '6wlqRxEgp60JXkcGkLY2' //must match the api key used on the server
+const selectComputer = true // return from dv popup with computer selected for a faster load
+const oauthMethod = 'popup' // The oauth method: popup || window
+
+let computerConnection, desktop, keyboard, controls
 
 let code,
   token,
   computers = [],
   computerId
-let computerConnection, desktop, keyboard, controls
 
-const sceneContainer = document.getElementById('scene-container')
-const computersContainer = document.getElementById('computers-wrapper')
-const authCodeButton = document.getElementById('dv-auth-code')
-const authTokenButton = document.getElementById('dv-auth-token')
-const fetchComputersButton = document.getElementById('dv-fetch-computers')
-const connectSingleComputerButton = document.getElementById(
-  'dv-connect-computer',
-)
-const enterSceneButton = document.getElementById('enter-scene-button')
-const createComputerButton = document.getElementById('computer-test-button')
-const removeComputerButton = document.getElementById('computer-remove-button')
-const canvas = document.getElementById('renderCanvas')
-
-const clientID = '6wlqRxEgp60JXkcGkLY2' //must match the api key used on the server
-
-const desktopPosition = { x: 0, y: 0, z: 2 }
-const kbPosition = { x: 0, y: 0, z: 0 }
+const engine = createDefaultEngine()
+const scene = createScene(engine)
+const testPlane = createTestPlane(scene)
+const camera = createCamera(scene)
+const xrHelper = scene.createDefaultXRExperienceAsync()
 
 const keyboardOptions = {
-  initialPosition: kbPosition,
+  initialPosition: { x: 0, y: 0, z: 0 },
   initialScalar: 0.35,
-  hideMoveIcon: false,
-  hideResizeIcon: false,
+  hideMoveIcon: false
 }
 
 const desktopOptions = {
-  initialPosition: desktopPosition,
+  initialPosition: { x: 0, y: 0, z: 2 },
   renderScreenBack: true,
   initialScalar: 1,
   hideMoveIcon: false,
-  hideResizeIcon: false,
   includeKeyboard: true,
   grabDistance: 1,
 }
 
-const engine = createDefaultEngine()
-const scene = createScene()
-const testPlane = createTestPlane()
-const camera = createCamera()
-const xrHelper = scene.createDefaultXRExperienceAsync()
+enterSceneButton.onclick = enterVR
+authCodeButton.onclick = getDesktopVisionCode
+authTokenButton.onclick = connectToDV
+fetchComputersButton.onclick = fetchComputers
+createComputerButton.onclick = createTestComputer
+connectSingleComputerButton.onclick = connectToSingleComputer
+removeComputerButton.onclick = removeComputer
 
-function createDefaultEngine() {
-  return new BABYLON.Engine(canvas, true, {
-    preserveDrawingBuffer: true,
-    stencil: true,
-    disableWebGL2Support: false,
-  })
+function parseUrlForCode() {
+  const urlParams = new URLSearchParams(window.location.search)
+  code = urlParams.get('code')
+  computerId = urlParams.get('computer_id')
 }
 
-function createScene() {
-  const scene = new BABYLON.Scene(engine)
-  const light = new BABYLON.HemisphericLight(
-    'light',
-    new BABYLON.Vector3(0, 1, 0),
-  )
-  BABYLON
-  return scene
-}
-
-function createCamera() {
-  const camera = new BABYLON.UniversalCamera(
-    'camera',
-    new BABYLON.Vector3(0, 0, 0),
-  )
-  camera.attachControl(canvas, true)
-  return camera
-}
-
-
-function createTestPlane() {
-  const testMat = new BABYLON.StandardMaterial('test-mat', scene)
-  const color = new BABYLON.Color4(0, 0, 0, 1)
-  testMat.diffuseColor = color
-  testMat.specularColor = color
-  testMat.emissiveColor = color
-  testMat.ambientColor = color
-  const testOptions = {
-    height: 1,
-    width: 2,
-    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-  }
-
-  const testPlane = BABYLON.MeshBuilder.CreatePlane(
-    'test-mesh',
-    testOptions,
-    scene,
-  )
-  testPlane.position.z = 2
-
-  return testPlane
-}
-
-function addButtonEventListeners() {
-  enterSceneButton.onclick = enterVR
-  authCodeButton.onclick = getDvCode
-  authTokenButton.onclick = connectToDV
-  fetchComputersButton.onclick = fetchComputers
-  createComputerButton.onclick = createTestComputer
-  connectSingleComputerButton.onclick = connectToSingleComputer
-  removeComputerButton.onclick = removeComputer
-}
-function updateButtonState() {
-  authCodeButton.disabled = code
-  fetchComputersButton.disabled = !token
-  authTokenButton.disabled = !code
-  connectSingleComputerButton.disabled = !token || !computerId
-}
-
-function getDvCode() {
+function getDesktopVisionCode() {
   const scope = encodeURIComponent('connect,list')
-
   const redirectURL = new URL(window.location.href)
   redirectURL.searchParams.set('oauth', 'desktopvision')
   const redirectUri = encodeURIComponent(redirectURL)
-  const selectComputer = true
-  const method = 'popup' // change this to something else for same window auth
-  if (method === 'popup') {
-    const newWindow = window.open(
-      `https://desktop.vision/login/?response_type=code&client_id=${clientID}&scope=${scope}&redirect_uri=${redirectUri}&redirect_type=popup&selectComputer=true`,
-    )
-    window.onmessage = function (e) {
-      code = e.data.code
-      computerId = e.data.computerId
-      if (code && computerId) {
-        newWindow.close()
-        updateButtonState()
-      }
-    }
+  if (oauthMethod === 'popup') {
+    getDesktopVisionCodePopup(scope, redirectUri)
   } else {
-    window.location.href = `https://desktop.vision/login/?response_type=code&client_id=${clientID}&scope=${scope}&redirect_uri=${redirectUri}&selectComputer=${selectComputer}`
+    getDesktopVisionCodeSameWindow(scope, redirectUri)
   }
+}
+
+function getDesktopVisionCodePopup(scope, redirectUri) {
+  const newWindow = window.open(
+    `https://desktop.vision/login/?response_type=code&client_id=${clientID}&scope=${scope}&redirect_uri=${redirectUri}&redirect_type=${oauthMethod}&selectComputer=${selectComputer}`,
+  )
+  window.onmessage = (e) => {
+    code = e.data.code
+    computerId = e.data.computerId
+    if (code && computerId) {
+      newWindow.close()
+      updateButtonState()
+    }
+  }
+}
+
+function getDesktopVisionCodeSameWindow(scope, redirectUri) {
+  window.location.href = `https://desktop.vision/login/?response_type=code&client_id=${clientID}&scope=${scope}&redirect_uri=${redirectUri}&selectComputer=${selectComputer}`
 }
 
 async function connectToDV() {
@@ -186,11 +125,6 @@ function createComputerButtons(computers) {
   }
 }
 
-function checkUrlParams() {
-  const urlParams = new URLSearchParams(window.location.search)
-  code = urlParams.get('code')
-  computerId = urlParams.get('computer_id')
-}
 
 function clearUrlParams() {
   const url = new URL(location.href)
@@ -210,27 +144,32 @@ async function connectToComputer(computer) {
   const res = await fetch(apiEndPoint, fetchOptions)
   const { roomOptions } = await res.json()
 
-  removeComputer()
   createComputerConnection(roomOptions)
 }
 
 function createComputerConnection(connectionOptions) {
   if (computerConnection) computerConnection = null
   computerConnection = new ComputerConnection(connectionOptions)
-  computerConnection.on('stream-added', (newStream) => {
-    const video = document.getElementById('video-stream')
-    video.setAttribute('webkit-playsinline', 'webkit-playsinline')
-    video.setAttribute('playsinline', 'playsinline')
-    video.srcObject = newStream
-    video.muted = true
-    video.play()
+  computerConnection.on('stream-added', handleStreamAdded)
+}
 
-    createComputer(video)
-  })
+function handleStreamAdded(newStream) {
+  removeComputer()
+
+  const video = document.getElementById('video-stream')
+  video.setAttribute('webkit-playsinline', 'webkit-playsinline')
+  video.setAttribute('playsinline', 'playsinline')
+  video.srcObject = newStream
+  video.muted = true
+  video.play()
+
+  createComputer(video)
 }
 
 function createComputer(video) {
-  desktopOptions.attachTo = testPlane
+  if (checkBox && checkBox.checked) desktopOptions.attachTo = testPlane
+  else desktopOptions.attachTo = null
+
   desktop = new Computer(
     scene,
     video,
@@ -248,12 +187,11 @@ function removeComputer() {
     desktop.remove()
     desktop = null
   }
-  if (computerConnection) {
-    computerConnection = null
-  }
 }
 
 function createTestComputer() {
+  removeComputer()
+
   const video = document.getElementById('video-stream')
   video.setAttribute('webkit-playsinline', 'webkit-playsinline')
   video.setAttribute('playsinline', 'playsinline')
@@ -261,7 +199,6 @@ function createTestComputer() {
   video.muted = true
   video.play()
 
-  removeComputer()
   createComputer(video)
 }
 
@@ -269,7 +206,6 @@ function enterVR() {
   const babylonVRButton = document.getElementsByClassName('babylonVRicon')[0]
   babylonVRButton.click()
 }
-
 
 engine.runRenderLoop(function () {
   if (scene && scene.activeCamera) {
@@ -283,6 +219,7 @@ window.addEventListener('resize', function () {
   engine.resize()
 })
 
-checkUrlParams()
+parseUrlForCode()
 updateButtonState()
-addButtonEventListeners()
+
+export { code, computerId, token }
