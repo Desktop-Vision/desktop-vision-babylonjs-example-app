@@ -19,11 +19,12 @@ const connectSingleComputerButton = document.getElementById(
 )
 const enterSceneButton = document.getElementById('enter-scene-button')
 const createComputerButton = document.getElementById('computer-test-button')
+const removeComputerButton = document.getElementById('computer-remove-button')
 const canvas = document.getElementById('renderCanvas')
 
 const clientID = '6wlqRxEgp60JXkcGkLY2' //must match the api key used on the server
 
-const desktopPosition = { x: 0, y: 0.25, z: 2 }
+const desktopPosition = { x: 0, y: 0, z: 2 }
 const kbPosition = { x: 0, y: 0, z: 0 }
 
 const keyboardOptions = {
@@ -45,7 +46,7 @@ const desktopOptions = {
 
 const engine = createDefaultEngine()
 const scene = createScene()
-const testBox = createTestBox()
+const testPlane = createTestPlane()
 const camera = createCamera()
 const xrHelper = scene.createDefaultXRExperienceAsync()
 
@@ -76,6 +77,30 @@ function createCamera() {
   return camera
 }
 
+
+function createTestPlane() {
+  const testMat = new BABYLON.StandardMaterial('test-mat', scene)
+  const color = new BABYLON.Color4(0, 0, 0, 1)
+  testMat.diffuseColor = color
+  testMat.specularColor = color
+  testMat.emissiveColor = color
+  testMat.ambientColor = color
+  const testOptions = {
+    height: 1,
+    width: 2,
+    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+  }
+
+  const testPlane = BABYLON.MeshBuilder.CreatePlane(
+    'test-mesh',
+    testOptions,
+    scene,
+  )
+  testPlane.position.z = 2
+
+  return testPlane
+}
+
 function addButtonEventListeners() {
   enterSceneButton.onclick = enterVR
   authCodeButton.onclick = getDvCode
@@ -83,6 +108,7 @@ function addButtonEventListeners() {
   fetchComputersButton.onclick = fetchComputers
   createComputerButton.onclick = createTestComputer
   connectSingleComputerButton.onclick = connectToSingleComputer
+  removeComputerButton.onclick = removeComputer
 }
 function updateButtonState() {
   authCodeButton.disabled = code
@@ -184,6 +210,7 @@ async function connectToComputer(computer) {
   const res = await fetch(apiEndPoint, fetchOptions)
   const { roomOptions } = await res.json()
 
+  removeComputer()
   createComputerConnection(roomOptions)
 }
 
@@ -198,13 +225,12 @@ function createComputerConnection(connectionOptions) {
     video.muted = true
     video.play()
 
-    removeComputer()
     createComputer(video)
   })
 }
 
 function createComputer(video) {
-  desktopOptions.attachTo = testBox
+  desktopOptions.attachTo = testPlane
   desktop = new Computer(
     scene,
     video,
@@ -221,6 +247,9 @@ function removeComputer() {
   if (desktop) {
     desktop.remove()
     desktop = null
+  }
+  if (computerConnection) {
+    computerConnection = null
   }
 }
 
@@ -241,28 +270,6 @@ function enterVR() {
   babylonVRButton.click()
 }
 
-function createTestBox() {
-  const testMat = new BABYLON.StandardMaterial('test-mat', scene)
-  const color = new BABYLON.Color4(0, 0, 0, 1)
-  testMat.diffuseColor = color
-  testMat.specularColor = color
-  testMat.emissiveColor = color
-  testMat.ambientColor = color
-  const testOptions = {
-    height: 1,
-    width: 2,
-    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-  }
-
-  const testBox = BABYLON.MeshBuilder.CreatePlane(
-    'test-mesh',
-    testOptions,
-    scene,
-  )
-  testBox.position.z = 5
-
-  return testBox
-}
 
 engine.runRenderLoop(function () {
   if (scene && scene.activeCamera) {
