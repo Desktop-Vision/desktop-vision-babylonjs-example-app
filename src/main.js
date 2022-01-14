@@ -1,9 +1,10 @@
 import * as BABYLON from 'babylonjs'
 import { createDefaultEngine, createScene, createCamera, createTestPlane } from './setup/setupScene'
 import { updateButtonState, authCodeButton, authTokenButton, checkBox, fetchComputersButton, connectSingleComputerButton, enterSceneButton, createComputerButton, removeComputerButton, computersContainer } from './setup/setupDocument'
+import DesktopVision from '@desktop.vision/js-sdk/dist/babylon.min'
 
 const { Computer, Keyboard, Controls, ComputerConnection } =
-  window.DesktopVision.loadSDK(BABYLON)
+DesktopVision.loadSDK(BABYLON)
 
 const clientID = '6wlqRxEgp60JXkcGkLY2' //must match the api key used on the server
 const selectComputer = true // return from dv popup with computer selected for a faster load
@@ -18,6 +19,7 @@ let code,
 
 const engine = createDefaultEngine()
 const scene = createScene(engine)
+scene.debugLayer.show();
 const testPlane = createTestPlane(scene)
 const camera = createCamera(scene)
 const xrHelper = scene.createDefaultXRExperienceAsync()
@@ -33,7 +35,7 @@ const desktopOptions = {
   renderScreenBack: true,
   initialScalar: 1,
   hideMoveIcon: false,
-  includeKeyboard: true,
+  includeKeyboard: false,
   grabDistance: 1,
 }
 
@@ -166,7 +168,7 @@ function handleStreamAdded(newStream) {
   createComputer(video)
 }
 
-function createComputer(video) {
+async function createComputer(video) {
   if (checkBox && checkBox.checked) desktopOptions.attachTo = testPlane
   else desktopOptions.attachTo = null
 
@@ -177,7 +179,6 @@ function createComputer(video) {
     camera,
     desktopOptions,
   )
-  keyboard = new Keyboard(desktop, keyboardOptions)
   controls = new Controls(desktop)
   desktop.keyboard = keyboard
 }

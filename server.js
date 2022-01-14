@@ -1,9 +1,12 @@
-const express = require('express');
-require('dotenv').config()
+import fetch from 'node-fetch';
+import express from 'express'
+import dotenv from 'dotenv'
+import path from 'path';
+dotenv.config()
 
 const port = process.env.PORT || 3000;
 const app = express()
-const fetch = require('node-fetch')
+const __dirname = path.resolve();
 
 const appID = process.env.DESKTOP_VISION_ID
 const apiKey = process.env.DESKTOP_VISION_KEY
@@ -32,6 +35,6 @@ app.get('/desktop-vision-auth', async (req, res) => {
     console.log('got token for user:', token.uid)
     return res.json({ token })
   } catch (e) {
-    res.send(404)
+    res.sendStatus(404)
   }
 });
